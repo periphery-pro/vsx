@@ -2,7 +2,7 @@
   "name": "periphery",
   "displayName": "Periphery",
   "description": "Find unused Swift code",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "Periphery",
   "license": "MIT",
   "repository": {
@@ -58,13 +58,15 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "vscode:prepublish": "tsc -p ./",
-    "package": "vsce package"
+    "package": "vsce package",
+    "release": "tsx scripts/release.ts"
   },
   "devDependencies": {
     "@types/node": "16.18.126",
     "@types/vscode": "1.80.0",
     "@vscode/vsce": "^3.9.1",
     "ovsx": "^0.10.12",
+    "tsx": "^4.21.0",
     "typescript": "^6.0.3"
   }
 }
