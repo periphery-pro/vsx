@@ -5,12 +5,12 @@ Find unused Swift code in your Swift packages. Automatically scans after package
 ## Requirements
 
 - [Periphery](https://periphery.pro) installed and on your `$PATH`
-- The [Swift extension](https://marketplace.visualstudio.com/items?itemName=sswg.swift-lang) for VS Code.
+- The Swift extension for VS Code, available on the [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=sswg.swift-lang) and [Open VSX Registry](https://open-vsx.org/extension/swiftlang/swift-vscode).
 
 ## Usage
 
 1. Open a Swift package in VS Code.
-2. Build it using the Swift extension (e.g. `Cmd+Shift+B`).
+2. Build it using the Swift extension.
 3. Periphery scans automatically after a successful build and reports unused code in the **Problems** pane.
 
 You can also run a scan manually from the command palette: **Periphery: Scan for Unused Code**.
