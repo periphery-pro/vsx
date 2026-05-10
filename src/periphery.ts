@@ -2,6 +2,7 @@ import * as cp from 'child_process';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { findIndexStore } from './indexStore';
+import type { SwiftBuildConfiguration } from './indexStore';
 
 // ---------------------------------------------------------------------------
 // Periphery JSON output types
@@ -61,7 +62,10 @@ export class PeripheryRunner {
      *
      * @param folder  The workspace folder that owns the Swift package.
      */
-    async scan(folder: vscode.WorkspaceFolder): Promise<void> {
+    async scan(
+        folder: vscode.WorkspaceFolder,
+        buildConfiguration: SwiftBuildConfiguration = 'debug'
+    ): Promise<void> {
         if (this.running) {
             this.log('A scan is already in progress; skipping.');
             return;
@@ -71,7 +75,7 @@ export class PeripheryRunner {
         this.diagnostics.clear();
 
         try {
-            await this.doScan(folder);
+            await this.doScan(folder, buildConfiguration);
         } finally {
             this.running = false;
         }
@@ -81,26 +85,29 @@ export class PeripheryRunner {
     // Private
     // -----------------------------------------------------------------------
 
-    private async doScan(folder: vscode.WorkspaceFolder): Promise<void> {
+    private async doScan(
+        folder: vscode.WorkspaceFolder,
+        buildConfiguration: SwiftBuildConfiguration
+    ): Promise<void> {
         const config = vscode.workspace.getConfiguration('periphery', folder.uri);
         const executablePath = config.get<string>('executablePath', 'periphery');
 
         const workspaceRoot = folder.uri.fsPath;
 
         // Locate the index store produced by the Swift extension build.
-        const indexStoreResult = findIndexStore(workspaceRoot, '.build');
+        const indexStoreResult = findIndexStore(workspaceRoot, '.build', buildConfiguration);
         if (!indexStoreResult) {
             this.log(
-                'Index store not found under ".build". ' +
+                `Index store not found for ${buildConfiguration} under ".build". ` +
                 'Build the package with the Swift extension first.'
             );
             vscode.window.showWarningMessage(
-                'Periphery: No index store found. Build the Swift package first.'
+                `Periphery: No ${buildConfiguration} index store found. Build the Swift package first.`
             );
             return;
         }
 
-        this.log(`Using index store: ${indexStoreResult.path}`);
+        this.log(`Using ${buildConfiguration} index store: ${indexStoreResult.path}`);
 
         const args = [
             'scan',

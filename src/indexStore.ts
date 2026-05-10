@@ -1,22 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-/**
- * Candidate index store sub-paths relative to the Swift build path.
- *
- * Swift Package Manager places the index store under:
- *   <buildPath>/<variant>/index/store   (Swift 5.4+)
- *   <buildPath>/index/store             (some older toolchains)
- *
- * We also check the release variant because a release build would write to
- * a different directory than a debug build.
- */
-const INDEX_STORE_CANDIDATES: ReadonlyArray<string> = [
-    'debug/index/store',
-    'release/index/store',
-    'index/store',
-];
+export type SwiftBuildConfiguration = 'debug' | 'release';
 
+/**
+ * Swift Package Manager places the index store under:
+ *   <buildPath>/<configuration>/index/store
+ */
 export interface IndexStoreResult {
     /** Absolute path to the index store directory. */
     path: string;
@@ -25,35 +15,28 @@ export interface IndexStoreResult {
 }
 
 /**
- * Locates the most recently modified index store under `buildPath`.
+ * Locates the index store under `buildPath` for the active build configuration.
  *
  * @param workspaceRoot  Absolute path to the workspace (package) root.
  * @param buildPath      Relative or absolute path to the Swift build folder.
+ * @param configuration  Swift build configuration that produced the index.
  * @returns The best matching index store, or `undefined` if none exists.
  */
 export function findIndexStore(
     workspaceRoot: string,
-    buildPath: string
+    buildPath: string,
+    configuration: SwiftBuildConfiguration = 'debug'
 ): IndexStoreResult | undefined {
     const absoluteBuildPath = path.isAbsolute(buildPath)
         ? buildPath
         : path.join(workspaceRoot, buildPath);
 
-    let best: IndexStoreResult | undefined;
-
-    for (const candidate of INDEX_STORE_CANDIDATES) {
-        const storePath = path.join(absoluteBuildPath, candidate);
-        if (!isDirectory(storePath)) {
-            continue;
-        }
-
-        const mtime = directoryMtime(storePath);
-        if (!best || mtime > best.mtime) {
-            best = { path: storePath, mtime };
-        }
+    const storePath = path.join(absoluteBuildPath, configuration, 'index', 'store');
+    if (!isDirectory(storePath)) {
+        return undefined;
     }
 
-    return best;
+    return { path: storePath, mtime: directoryMtime(storePath) };
 }
 
 // ---------------------------------------------------------------------------

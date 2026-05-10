@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import type { SwiftBuildConfiguration } from './indexStore';
 import { PeripheryRunner } from './periphery';
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -30,7 +31,10 @@ export function activate(context: vscode.ExtensionContext): void {
                 return;
             }
 
-            await runner.scan(workspaceFolder);
+            await runner.scan(
+                workspaceFolder,
+                swiftBuildConfiguration(event.execution.task)
+            );
         })
     );
 
@@ -76,6 +80,57 @@ function isSwiftBuildTask(task: vscode.Task): boolean {
         task.group?.id === vscode.TaskGroup.Build.id;
 
     return isBuildGroup && task.name.toLowerCase().includes('build');
+}
+
+/**
+ * Detects the SwiftPM configuration that the Swift extension used for a build
+ * task. Release builds are explicit; debug builds are usually the default.
+ */
+function swiftBuildConfiguration(task: vscode.Task): SwiftBuildConfiguration {
+    return (
+        configurationFromSwiftArgs(task.definition.args) ??
+        configurationFromText(`${task.name} ${task.detail ?? ''}`) ??
+        'debug'
+    );
+}
+
+function configurationFromSwiftArgs(args: unknown): SwiftBuildConfiguration | undefined {
+    if (!Array.isArray(args)) {
+        return undefined;
+    }
+
+    for (let i = 0; i < args.length; i++) {
+        const normalized = stringArg(args[i])?.toLowerCase();
+        if (!normalized) {
+            continue;
+        }
+
+        if (normalized === '-c' || normalized === '--configuration') {
+            return configurationFromText(stringArg(args[i + 1]) ?? '');
+        }
+
+        const inlineMatch = normalized.match(/^(?:-c=?|--configuration=)(debug|release)$/);
+        if (inlineMatch) {
+            return inlineMatch[1] as SwiftBuildConfiguration;
+        }
+    }
+
+    return undefined;
+}
+
+function configurationFromText(text: string): SwiftBuildConfiguration | undefined {
+    const normalized = text.toLowerCase();
+    if (/\brelease\b/.test(normalized)) {
+        return 'release';
+    }
+    if (/\bdebug\b/.test(normalized)) {
+        return 'debug';
+    }
+    return undefined;
+}
+
+function stringArg(arg: unknown): string | undefined {
+    return typeof arg === 'string' ? arg : undefined;
 }
 
 /**

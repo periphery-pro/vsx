@@ -57,7 +57,8 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "vscode:prepublish": "tsc -p ./"
+    "vscode:prepublish": "tsc -p ./",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/node": "16.18.126",
