@@ -2,7 +2,7 @@
   "name": "periphery",
   "displayName": "Periphery",
   "description": "Find unused Swift code",
-  "version": "0.2.0",
+  "version": "0.1.1",
   "publisher": "Periphery",
   "license": "MIT",
   "repository": {
