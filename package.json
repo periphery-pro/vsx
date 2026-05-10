@@ -1,0 +1,69 @@
+{
+  "name": "periphery",
+  "displayName": "Periphery",
+  "description": "Find unused Swift code",
+  "version": "0.1.0",
+  "publisher": "Periphery",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/periphery-pro/vsx.git"
+  },
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters"
+  ],
+  "keywords": [
+    "swift",
+    "periphery",
+    "unused code",
+    "dead code",
+    "linter"
+  ],
+  "activationEvents": [
+    "workspaceContains:Package.swift"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "periphery.scan",
+        "title": "Periphery: Scan for Unused Code"
+      },
+      {
+        "command": "periphery.clear",
+        "title": "Periphery: Clear Results"
+      }
+    ],
+    "configuration": {
+      "title": "Periphery",
+      "properties": {
+        "periphery.executablePath": {
+          "type": "string",
+          "default": "periphery",
+          "markdownDescription": "Path to the `periphery` executable. Defaults to `periphery` (assumes it is on `$PATH`)."
+        },
+        "periphery.scanOnBuild": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Automatically run Periphery after a successful Swift package build."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "tsc -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "16.18.126",
+    "@types/vscode": "1.80.0",
+    "@vscode/vsce": "^3.9.1",
+    "ovsx": "^0.10.12",
+    "typescript": "^6.0.3"
+  }
+}
